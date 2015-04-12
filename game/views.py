@@ -5,9 +5,13 @@ from django.http import JsonResponse
 from game.models import WorldNode
 
 
-def node(request, x, y):
-
-  node = WorldNode.objects.get(x_pos=x, y_pos=y)
+def node(request):
+  """
+  """
+  node = WorldNode.objects.get(
+    x_pos=request.GET.get('x', None),
+    y_pos=request.GET.get('y', None)
+  )
   node_dict = {
     'x': node.x_pos,
     'y': node.y_pos,

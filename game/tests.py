@@ -27,7 +27,11 @@ class GameTest(TestCase):
 
 
   def _get_nodes(self, x=None, y=None, **kwargs):
-    path = '/game/node/%s/%s/' % (x, y)
+    path = '/game/node/'
+
+    kwargs['x'] = x
+    kwargs['y'] = y
+
     response = self.client.get(
       path=path,
       data=kwargs,
