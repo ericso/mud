@@ -2,6 +2,8 @@ import json
 
 from django.test import TestCase
 
+from game.models import WorldNode
+
 
 class GameTest(TestCase):
   """Test class for Game API
@@ -12,12 +14,17 @@ class GameTest(TestCase):
   def setUp(self):
     """Create a test question and associated answer in the database
     """
-    pass
+    self.origin = WorldNode.objects.create(
+      x_pos=0,
+      y_pos=0,
+      text="Start Here"
+    )
 
   def tearDown(self):
     """Clear test database
     """
-    pass
+    WorldNode.objects.all().delete()
+
 
   def _get_nodes(self, x=None, y=None, **kwargs):
     path = '/game/node/%s/%s/' % (x, y)

@@ -1,13 +1,21 @@
 from django.shortcuts import render
-# from django.http import HttpResponse
 from django.http import JsonResponse
+# from django.core import serializers
+
+from game.models import WorldNode
 
 
-# Create your views here.
 def node(request, x, y):
 
+  node = WorldNode.objects.get(x_pos=x, y_pos=y)
+  node_dict = {
+    'x': node.x_pos,
+    'y': node.y_pos,
+    'text': node.text,
+  }
+
   data = {
-    'node': 'node obj',
+    'node': node_dict
   }
 
   return JsonResponse(data)
