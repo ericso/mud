@@ -1,7 +1,7 @@
 $(function() {
 
   // Setup the 'enter' keypress event
-  $('input').keyup(function(e){
+  $('input').keyup(function(e) {
     if (e.keyCode == 13) {
       $(this).trigger('enter');
     }

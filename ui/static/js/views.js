@@ -29,9 +29,9 @@ $(function() {
     initialize: function() {
       this.render();
     },
-    render: function() {
-
-    },
+    // render: function() {
+    //   var that = this;
+    // },
     events: {
       'enter': 'processCommand'
     },
@@ -56,10 +56,9 @@ $(function() {
   // Backbone View for console output
   App.Views.ConsoleOutput = Backbone.View.extend({
     el: '#id-console-out',
-    render: function(search) {
-      var that = this;
-
-    }
+    // render: function() {
+    //   var that = this;
+    // }
   });
 
 });
