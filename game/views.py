@@ -25,6 +25,7 @@ def node(request, node_id=None):
       try:
         node = WorldNode.objects.get(pk=node_id)
       except:
+        print("error")
         data['status'] = 'Error'
         raise Http404("Node could not be retrieved: %s" % (node_id,))
       else:
@@ -44,14 +45,15 @@ def node(request, node_id=None):
         return JsonResponse(data)
 
   elif request.method == 'POST':
+    # Parameters are in the request body, since POST type is
+    #  `application/json`
     params = json.loads(request.body)
-
     x = params.get('x', None)
     y = params.get('y', None)
     text = params.get('text', None)
 
     try:
-      node = WorldNode.objects.create(x_pos=x, y_pos=y, text=text)
+      node = WorldNode.objects.create(x=x, y=y, text=text)
     except:
       data['status'] = 'Error'
       raise Http404("Node could not be created")
@@ -59,3 +61,31 @@ def node(request, node_id=None):
       data['status'] = 'Success'
       data['payload'] = serializers.serialize('json', [node])
       return JsonResponse(data)
+
+  elif request.method == 'PUT':
+    params = json.loads(request.body)
+    x = params.get('x', None)
+    y = params.get('y', None)
+    text = params.get('text', None)
+
+    # Get the node
+    try:
+      node = WorldNode.objects.get(pk=node_id)
+    except:
+      data['status'] = 'Error'
+      raise Http404("Node could not be found")
+    else:
+      # Update the node
+      node.x = x
+      node.y = y
+      node.text = text
+
+      try:
+        node.save()
+      except:
+        data['status'] = 'Error'
+        raise Http404("Node could not be updated")
+      else:
+        data['status'] = 'Success'
+        data['payload'] = serializers.serialize('json', [node])
+        return JsonResponse(data)
