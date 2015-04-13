@@ -25,7 +25,6 @@ def node(request, node_id=None):
       try:
         node = WorldNode.objects.get(pk=node_id)
       except:
-        print("error")
         data['status'] = 'Error'
         raise Http404("Node could not be retrieved: %s" % (node_id,))
       else:
@@ -89,3 +88,14 @@ def node(request, node_id=None):
         data['status'] = 'Success'
         data['payload'] = serializers.serialize('json', [node])
         return JsonResponse(data)
+
+  elif request.method == 'DELETE':
+    # Delete the node
+    try:
+      WorldNode.objects.get(pk=node_id).delete()
+    except:
+      data['status'] = 'Error'
+      raise Http404("Node could not be deleted")
+    else:
+      data['status'] = 'Success'
+      return JsonResponse(data)

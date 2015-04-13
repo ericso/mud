@@ -46,13 +46,18 @@ class GameTest(TestCase):
     return response
 
   def _put_node(self, node_id, **kwargs):
-    path = self.api_endpoint_base
-    if node_id:
-      path += str(node_id) + '/'
-
+    path = self.api_endpoint_base + str(node_id) + '/'
     response = self.client.put(
       path=path,
       data=json.dumps(kwargs),
+      content_type='application/json'
+    )
+    return response
+
+  def _delete_node(self, node_id):
+    path = self.api_endpoint_base + str(node_id) + '/'
+    response = self.client.delete(
+      path=path,
       content_type='application/json'
     )
     return response
@@ -141,13 +146,51 @@ class GameTest(TestCase):
     self.assertEqual(fields['y'], 3)
     self.assertEqual(fields['text'], "This is an updated node, now at 2, 3")
 
-  def test_put_without_id_results_in_error(self):
+  def test_put_to_node_without_id_results_in_error(self):
     node_data = {
       'x': 1,
       'y': 1,
       'text': "This is the node at 1, 1"
     }
     response = self._put_node(node_id=None, **node_data)
+    # data = json.loads(response.content.decode())
+    self.assertEqual(response.status_code, 404)
+    # self.assertIn('status', data.keys())
+    # self.assertEqual(data['status'], 'Error')
+
+  # DELETE
+  def test_delete_existing_node_removes_node_properly(self):
+    # Add a node
+    node_data = {
+      'x': 1,
+      'y': 1,
+      'text': "This is the node at 1, 1"
+    }
+    response = self._post_node(**node_data)
+    data = json.loads(response.content.decode())
+    payload = json.loads(data['payload'])
+    id_ = payload[0]['pk']
+    fields = payload[0]['fields']
+
+    self.assertIn('status', data.keys())
+    self.assertEqual(data['status'], 'Success')
+    self.assertEqual(fields['x'], 1)
+    self.assertEqual(fields['y'], 1)
+    self.assertEqual(fields['text'], "This is the node at 1, 1")
+
+    # Delete that node
+    response = self._delete_node(node_id=id_)
+    data = json.loads(response.content.decode())
+
+    self.assertIn('status', data.keys())
+    self.assertEqual(data['status'], 'Success')
+
+    # Make sure the node is gone
+    response = self._get_nodes(node_id=id_)
+    self.assertEqual(response.status_code, 404)
+
+  def test_delete_node_without_id_results_in_error(self):
+    response = self._delete_node(node_id=None)
     # data = json.loads(response.content.decode())
     self.assertEqual(response.status_code, 404)
     # self.assertIn('status', data.keys())
