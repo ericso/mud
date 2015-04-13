@@ -8,7 +8,7 @@ from game.models import WorldNode
 class GameTest(TestCase):
   """Test class for Game API
   Routes:
-  GET /game/node/x/y/ - Returns JSON containing game world nodes
+  GET /game/node/ - Returns JSON containing game world nodes
   """
 
   def setUp(self):
@@ -47,4 +47,4 @@ class GameTest(TestCase):
   def test_get_nodes_returns_nodes_JSON(self):
     response = self._get_nodes(0, 0)
     data = json.loads(response.content.decode())
-    self.assertIn('node', data.keys())
+    self.assertIn('nodes', data.keys())

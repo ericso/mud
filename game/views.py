@@ -7,19 +7,32 @@ from game.models import WorldNode
 
 def node(request):
   """
+  Routes:
+
+  GET /game/node/ - Returns JSON containing game world nodes
   """
-  node = WorldNode.objects.get(
-    x_pos=request.GET.get('x', None),
-    y_pos=request.GET.get('y', None)
-  )
-  node_dict = {
-    'x': node.x_pos,
-    'y': node.y_pos,
-    'text': node.text,
-  }
+  x = request.GET.get('x', None)
+  y = request.GET.get('y', None)
+
+  node_list = []
+
+  if x and y:
+    node = WorldNode.objects.get(
+      x_pos=x,
+      y_pos=y
+    )
+
+    node_list.append({
+      'x': node.x_pos,
+      'y': node.y_pos,
+      'text': node.text,
+    })
 
   data = {
-    'node': node_dict
+    'nodes': node_list
   }
 
   return JsonResponse(data)
+
+
+# TODO(make node return a set of nodes, some distance from x, y)
