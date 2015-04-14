@@ -1,0 +1,39 @@
+// GET /posts/
+{
+  "status" : "success",
+  "data" : {
+    "nodes" : [
+      {
+        "id": 1,
+        "text": "Some node text",
+        "x": 0,
+        "y": 0
+      },{
+        "id": 2,
+        "text": "Some other node text",
+        "x": 1,
+        "y": 2
+      }
+    ]
+  }
+}
+
+// DELETE /posts/2
+{
+  "status": "success",
+  "data": null
+}
+
+// Fail: When an API call is rejected due to invalid data or call conditions, the JSend object's data key contains an object explaining what went wrong, typically a hash of validation errors. For example:
+// POST /nodes (with data body: "Trying to creating a node")
+{
+  "status": "fail",
+  "data": null
+}
+
+// Error: When an API call fails due to an error on the server. For example:
+// GET /nodes
+{
+  "status": "error",
+  "message": "Unable to communicate with database"
+}
