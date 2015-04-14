@@ -27,12 +27,32 @@ $(function() {
     y: 2,
     text: "This is the node at 2,2"
   };
-  var node = new App.Models.NodeModel(nodeDetails);
+  var node = new App.Models.NodeModel();
 
   // The server should save the data and return a response containing the new `id`
-  node.save({
+  console.log("about to save a node");
+  node.save(nodeDetails, {
     success: function (n) {
-      alert(n.toJSON());
+      console.log(n);
+      var id_ = JSON.parse(n.get('payload')['pk']);
+      console.log(id_);
+      console.log(n.toJSON());
     }
-  })
+  });
+
+  console.log(node);
+
+  // node.save({
+  //   id: 22,
+  //   x: 5,
+  //   y: 6,
+  //   text: "This how we do it!",
+  // });
+
+  // console.log(node);
+
+  // node.destroy();
+
+  // console.log(node);
+
 });

@@ -1,7 +1,7 @@
 import json
 
 from django.shortcuts import render
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
 from django.core import serializers
 
 from game.models import WorldNode
@@ -15,33 +15,36 @@ def node(request, node_id=None):
   PUT /game/node/:id - Updates node
   DELETE /game/node/:id - Deletes the node with :id
   """
-  data = {
-    'status': None,
-    'payload': None
-  }
+  response = {}
 
   if request.method == 'GET':
     if node_id:
       try:
         node = WorldNode.objects.get(pk=node_id)
       except:
-        data['status'] = 'Error'
-        raise Http404("Node could not be retrieved: %s" % (node_id,))
+        # Should somehow return a 404 error message
+        # TODO(eso) use Django REST Framework
+        response['status'] = "fail"
+        response['message'] = "node with id: %s does not exist" % (node_id,)
       else:
-        data['status'] = 'Success'
-        data['payload'] = serializers.serialize('json', [node])
-        return JsonResponse(data)
+        response['status'] = "success"
+        response['data'] = {}
+        response['data']['nodes'] = serializers.serialize('json', [node])
+      finally:
+        return JsonResponse(response)
 
     else:
       try:
         nodes = WorldNode.objects.all()
       except:
-        data['status'] = 'Error'
-        raise Http404("Node could not be retrieved: %s" % (node_id,))
+        response['status'] = "error"
+        response['message'] = 'could not retrieve nodes'
       else:
-        data['status'] = 'Success'
-        data['payload'] = serializers.serialize('json', nodes)
-        return JsonResponse(data)
+        response['status'] = "success"
+        response['data'] = {}
+        response['data']['nodes'] = serializers.serialize('json', nodes)
+      finally:
+        return JsonResponse(response)
 
   elif request.method == 'POST':
     # Parameters are in the request body, since POST type is
@@ -54,12 +57,14 @@ def node(request, node_id=None):
     try:
       node = WorldNode.objects.create(x=x, y=y, text=text)
     except:
-      data['status'] = 'Error'
-      raise Http404("Node could not be created")
+      response['status'] = "fail"
+      response['message'] = 'could not create node'
     else:
-      data['status'] = 'Success'
-      data['payload'] = serializers.serialize('json', [node])
-      return JsonResponse(data)
+      response['status'] = "success"
+      response['data'] = {}
+      response['data']['nodes'] = serializers.serialize('json', [node])
+    finally:
+      return JsonResponse(response)
 
   elif request.method == 'PUT':
     params = json.loads(request.body)
@@ -71,8 +76,8 @@ def node(request, node_id=None):
     try:
       node = WorldNode.objects.get(pk=node_id)
     except:
-      data['status'] = 'Error'
-      raise Http404("Node could not be found")
+      response['status'] = "fail"
+      response['message'] = "could not get node to update"
     else:
       # Update the node
       node.x = x
@@ -82,20 +87,25 @@ def node(request, node_id=None):
       try:
         node.save()
       except:
-        data['status'] = 'Error'
-        raise Http404("Node could not be updated")
+        response['status'] = 'fail'
+        response['message'] = 'node with id: %s could not be updated' % (node_id,)
+        # TODO(eso) write test for this branch
       else:
-        data['status'] = 'Success'
-        data['payload'] = serializers.serialize('json', [node])
-        return JsonResponse(data)
+        response['status'] = 'success'
+        response['data'] = {}
+        response['data']['nodes'] = serializers.serialize('json', [node])
+
+    finally:
+      return JsonResponse(response)
 
   elif request.method == 'DELETE':
     # Delete the node
     try:
       WorldNode.objects.get(pk=node_id).delete()
     except:
-      data['status'] = 'Error'
-      raise Http404("Node could not be deleted")
+      response['status'] = 'fail'
+      response['message'] = "node could not be deleted"
     else:
-      data['status'] = 'Success'
-      return JsonResponse(data)
+      response['status'] = 'success'
+    finally:
+      return JsonResponse(response)

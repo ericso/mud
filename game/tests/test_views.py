@@ -27,7 +27,7 @@ class GameTest(TestCase):
   def _get_nodes(self, node_id=None, **kwargs):
     path = self.api_endpoint_base
     if node_id:
-      path += str(node_id) + '/'
+      path += str(node_id)
 
     response = self.client.get(
       path=path,
@@ -46,7 +46,10 @@ class GameTest(TestCase):
     return response
 
   def _put_node(self, node_id, **kwargs):
-    path = self.api_endpoint_base + str(node_id) + '/'
+    path = self.api_endpoint_base
+    if node_id:
+      path += str(node_id)
+
     response = self.client.put(
       path=path,
       data=json.dumps(kwargs),
@@ -55,7 +58,10 @@ class GameTest(TestCase):
     return response
 
   def _delete_node(self, node_id):
-    path = self.api_endpoint_base + str(node_id) + '/'
+    path = self.api_endpoint_base
+    if node_id:
+      path += str(node_id)
+
     response = self.client.delete(
       path=path,
       content_type='application/json'
@@ -69,13 +75,33 @@ class GameTest(TestCase):
     response = self._get_nodes()
     self.assertEqual(response.status_code, 200)
 
-  def test_get_nodes_returns_nodes_JSON_status(self):
+  def test_get_nodes_returns_status_success(self):
     response = self._get_nodes()
-    data = json.loads(response.content.decode())
-    self.assertIn('status', data.keys())
-    self.assertEqual(data['status'], 'Success')
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'success')
 
-  def test_get_node_with_id_returns_JSON_payload(self):
+  def test_get_node_returns_list_of_nodes(self):
+    WorldNode.objects.create(
+      x=0,
+      y=0,
+      text="Start Here"
+    )
+    WorldNode.objects.create(
+      x=1,
+      y=1,
+      text="Another node"
+    )
+    response = self._get_nodes()
+
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('data', resp_obj.keys())
+    self.assertIn('nodes', resp_obj['data'].keys())
+
+    nodes_obj = json.loads(resp_obj['data']['nodes'])
+    self.assertEqual(2, len(nodes_obj))
+
+  def test_get_node_with_id_returns_single_node(self):
     # TODO(eso) can I mock out the database
     # and get rid of this db transaction?
     WorldNode.objects.create(
@@ -84,32 +110,46 @@ class GameTest(TestCase):
       text="Start Here"
     )
     response = self._get_nodes(node_id=1)
-    data = json.loads(response.content.decode())
-    self.assertIn('payload', data.keys())
+    resp_obj = json.loads(response.content.decode())
+
+    self.assertIn('data', resp_obj.keys())
+    self.assertIn('nodes', resp_obj['data'].keys())
+
+  def test_get_node_with_incorrect_id_returns_error_status(self):
+    node_id = 1
+    response = self._get_nodes(node_id=node_id)
+    resp_obj = json.loads(response.content.decode())
+
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'fail')
+    self.assertEqual(resp_obj['message'], 'node with id: %s does not exist' % (node_id,))
 
   # POST
-  def test_post_node_returns_JSON_status(self):
+  def test_post_node_returns_success_status(self):
     node_data = {
       'x': 1,
       'y': 1,
       'text': "This is the node at 1,1"
     }
     response = self._post_node(**node_data)
-    data = json.loads(response.content.decode())
-    self.assertIn('status', data.keys())
-    self.assertEqual(data['status'], 'Success')
+    resp_obj = json.loads(response.content.decode())
 
-  def test_broken_post_node_returns_error_status_404(self):
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'success')
+
+  def test_broken_post_node_returns_error_status_and_message(self):
     node_data = {
       'x': 1,
       'y': None,
       'text': "This is a broken node"
     }
     response = self._post_node(**node_data)
-    # data = json.loads(response.content.decode())
-    self.assertEqual(response.status_code, 404)
-    # self.assertIn('status', data.keys())
-    # self.assertEqual(data['status'], 'Error')
+    resp_obj = json.loads(response.content.decode())
+
+    # self.assertEqual(response.status_code, 404)
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'fail')
+    self.assertEqual(resp_obj['message'], 'could not create node')
 
   # PUT
   def test_put_to_existing_node_updates_node_properly(self):
@@ -119,13 +159,14 @@ class GameTest(TestCase):
       'text': "This is the node at 1, 1"
     }
     response = self._post_node(**node_data)
-    data = json.loads(response.content.decode())
-    payload = json.loads(data['payload'])
-    id_ = payload[0]['pk']
-    fields = payload[0]['fields']
 
-    self.assertIn('status', data.keys())
-    self.assertEqual(data['status'], 'Success')
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'success')
+
+    nodes = json.loads(resp_obj['data']['nodes'])
+    id_ = nodes[0]['pk']
+    fields = nodes[0]['fields']
     self.assertEqual(fields['x'], 1)
     self.assertEqual(fields['y'], 1)
     self.assertEqual(fields['text'], "This is the node at 1, 1")
@@ -136,12 +177,13 @@ class GameTest(TestCase):
       'text': "This is an updated node, now at 2, 3"
     }
     response = self._put_node(node_id=id_, **update_data)
-    data = json.loads(response.content.decode())
-    payload = json.loads(data['payload'])
-    fields = payload[0]['fields']
 
-    self.assertIn('status', data.keys())
-    self.assertEqual(data['status'], 'Success')
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'success')
+
+    nodes = json.loads(resp_obj['data']['nodes'])
+    fields = nodes[0]['fields']
     self.assertEqual(fields['x'], 2)
     self.assertEqual(fields['y'], 3)
     self.assertEqual(fields['text'], "This is an updated node, now at 2, 3")
@@ -153,12 +195,13 @@ class GameTest(TestCase):
       'text': "This is the node at 1, 1"
     }
     response = self._put_node(node_id=None, **node_data)
-    # data = json.loads(response.content.decode())
-    self.assertEqual(response.status_code, 404)
-    # self.assertIn('status', data.keys())
-    # self.assertEqual(data['status'], 'Error')
 
-  # DELETE
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], "fail")
+    self.assertEqual(resp_obj['message'], "could not get node to update")
+
+  # # DELETE
   def test_delete_existing_node_removes_node_properly(self):
     # Add a node
     node_data = {
@@ -167,31 +210,37 @@ class GameTest(TestCase):
       'text': "This is the node at 1, 1"
     }
     response = self._post_node(**node_data)
-    data = json.loads(response.content.decode())
-    payload = json.loads(data['payload'])
-    id_ = payload[0]['pk']
-    fields = payload[0]['fields']
 
-    self.assertIn('status', data.keys())
-    self.assertEqual(data['status'], 'Success')
-    self.assertEqual(fields['x'], 1)
-    self.assertEqual(fields['y'], 1)
-    self.assertEqual(fields['text'], "This is the node at 1, 1")
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'success')
+
+    nodes = json.loads(resp_obj['data']['nodes'])
+    node_id = nodes[0]['pk']
+    # fields = nodes[0]['fields']
+    # self.assertEqual(fields['x'], 1)
+    # self.assertEqual(fields['y'], 1)
+    # self.assertEqual(fields['text'], "This is the node at 1, 1")
 
     # Delete that node
-    response = self._delete_node(node_id=id_)
-    data = json.loads(response.content.decode())
+    response = self._delete_node(node_id=node_id)
 
-    self.assertIn('status', data.keys())
-    self.assertEqual(data['status'], 'Success')
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'success')
 
     # Make sure the node is gone
-    response = self._get_nodes(node_id=id_)
-    self.assertEqual(response.status_code, 404)
+    response = self._get_nodes(node_id=node_id)
+
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'fail')
+    self.assertEqual(resp_obj['message'], 'node with id: %s does not exist' % (node_id,))
 
   def test_delete_node_without_id_results_in_error(self):
     response = self._delete_node(node_id=None)
-    # data = json.loads(response.content.decode())
-    self.assertEqual(response.status_code, 404)
-    # self.assertIn('status', data.keys())
-    # self.assertEqual(data['status'], 'Error')
+
+    resp_obj = json.loads(response.content.decode())
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'fail')
+    self.assertEqual(resp_obj['message'], 'node could not be deleted')

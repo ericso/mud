@@ -1,3 +1,6 @@
+// This is adapted from JSend
+// http://labs.omniti.com/labs/jsend/wiki
+
 // GET /posts/
 {
   "status" : "success",
@@ -28,6 +31,7 @@
 // POST /nodes (with data body: "Trying to creating a node")
 {
   "status": "fail",
+  "message": "failure message",
   "data": null
 }
 
