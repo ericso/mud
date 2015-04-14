@@ -27,32 +27,38 @@ $(function() {
     y: 2,
     text: "This is the node at 2,2"
   };
-  var node = new App.Models.NodeModel();
+  app.node = new App.Models.NodeModel();
 
-  // The server should save the data and return a response containing the new `id`
-  console.log("about to save a node");
-  node.save(nodeDetails, {
-    success: function (n) {
-      console.log(n);
-      var id_ = JSON.parse(n.get('payload')['pk']);
-      console.log(id_);
-      console.log(n.toJSON());
-    }
+  console.log("about to create a node");
+  app.node.save(
+    nodeDetails
+  ).done(function(data, textStatus, jqXHR) {
+    console.log(data);
+
+    var nodes = JSON.parse(data.data.nodes);
+    var node_id = nodes[0].pk;
+    console.log(node_id);
+    console.log(app.node);
+
+    console.log("about to update a node");
+    app.node.save({
+      id: app.node.id,
+      x: 5,
+      y: 6,
+      text: "This how we do it!",
+    }).done(function(data, textStatus, jqXHR) {
+      console.log(data);
+
+      console.log("about to destroy a node");
+      app.node.destroy().done(function(data, textStatus, jqXHR) {
+        console.log("done destroying a node");
+        console.log(data);
+
+        console.log("delete app.node from client");
+        delete(app.node);
+        console.log(app.node);
+      });
+    });
   });
-
-  console.log(node);
-
-  // node.save({
-  //   id: 22,
-  //   x: 5,
-  //   y: 6,
-  //   text: "This how we do it!",
-  // });
-
-  // console.log(node);
-
-  // node.destroy();
-
-  // console.log(node);
 
 });
