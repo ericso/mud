@@ -1,12 +1,11 @@
 $(function() {
   'use strict';
 
-  App.Collections.Nodes = Backbone.Collection.extend({
-    model: Node,
+  App.Collections.WorldNodes = Backbone.Collection.extend({
+    model: App.Models.WorldNode,
+    url: '/game/node/',
     parse: function(response, xhr) {
-      console.log("inside parse");
-      console.log(response);
-      console.log(xhr);
+      return JSON.parse(response.data.nodes);
     }
   });
 
