@@ -20,3 +20,7 @@ body {
   /*background-color: #000;*/
   /*color: #0f0;*/
 }
+
+#id-console-out {
+  /*overflow-y: scroll;*/
+}
