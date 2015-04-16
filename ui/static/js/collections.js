@@ -6,7 +6,7 @@ $(function() {
     url: '/game/node/',
     parse: function(response, xhr) {
       return JSON.parse(response.data.nodes);
-    }
+    },
   });
 
 });

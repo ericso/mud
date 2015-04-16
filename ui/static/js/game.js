@@ -11,6 +11,30 @@ $(function() {
     $(document.body).scrollTop(pos.top);
   }
 
+  // Create a player object
+  app.player = {
+    name: "Unknown Person",
+    position: {
+      x: 0,
+      y: 0
+    },
+    updatePosition: function(x, y) {
+      this.position.x = x;
+      this.position.y = y;
+    },
+  }
+
+  // TODO(eso) refactor function to print players curr pos text
+
+  app.world = new App.Collections.WorldNodes();
+  app.world.fetch().done(function(response) {
+    var currPos = app.world.where({
+      x: app.player.position.x,
+      y: app.player.position.y,
+    })[0];
+    app.outputToConsole(currPos.get('text'));
+  });
+
   app.gameCommands.mappings = {
     'move': [
       'walk',
@@ -34,8 +58,40 @@ $(function() {
     ]
   }
 
+  // Game functions
+  // These are executed based on what the player types
   app.move = function(args) {
-    app.outputToConsole("move() args: " + args);
+    // Take the current user's position
+    // move the user to the new position
+    // call function to print out current position's text
+
+    // app.outputToConsole("move() args: " + args);
+
+    if (_.contains(args, 'north')) {
+      // currPosY++;
+      app.player.position.y++;
+    } else if (_.contains(args, 'south')) {
+      // currPosY--;
+      app.player.position.y--;
+    } else if (_.contains(args, 'east')) {
+      // currPosX++;
+      app.player.position.x++;
+    } else if (_.contains(args, 'west')) {
+      // currPosX--;
+      app.player.position.x--;
+    } else {
+      app.outputToConsole("did not understand direction");
+    }
+
+    console.log(app.player.position);
+
+    var currPos = app.world.where({
+      x: app.player.position.x,
+      y: app.player.position.y,
+    })[0];
+
+    app.outputToConsole(currPos.get('text'));
+
   }
   app.observe = function(args) {
     app.outputToConsole("observe() args: " + args);
