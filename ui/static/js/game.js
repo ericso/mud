@@ -61,37 +61,42 @@ $(function() {
   // Game functions
   // These are executed based on what the player types
   app.move = function(args) {
-    // Take the current user's position
-    // move the user to the new position
-    // call function to print out current position's text
-
-    // app.outputToConsole("move() args: " + args);
-
-    if (_.contains(args, 'north')) {
-      // currPosY++;
-      app.player.position.y++;
-    } else if (_.contains(args, 'south')) {
-      // currPosY--;
-      app.player.position.y--;
-    } else if (_.contains(args, 'east')) {
-      // currPosX++;
-      app.player.position.x++;
-    } else if (_.contains(args, 'west')) {
-      // currPosX--;
-      app.player.position.x--;
-    } else {
-      app.outputToConsole("did not understand direction");
-    }
-
-    console.log(app.player.position);
-
+    /// Moves the player in the specified direction
     var currPos = app.world.where({
       x: app.player.position.x,
       y: app.player.position.y,
     })[0];
 
-    app.outputToConsole(currPos.get('text'));
+    var xDelta = 0;
+    var yDelta = 0;
+    var direction = null;
+    if (_.contains(args, 'north')) {
+      yDelta++;
+      direction = 'north';
+    } else if (_.contains(args, 'south')) {
+      yDelta--;
+      direction = 'south';
+    } else if (_.contains(args, 'east')) {
+      xDelta++;
+      direction = 'east';
+    } else if (_.contains(args, 'west')) {
+      xDelta--;
+      direction = 'west';
+    } else {
+      app.outputToConsole("did not understand direction");
+    }
 
+    var nextPos = app.world.where({
+      x: app.player.position.x + xDelta,
+      y: app.player.position.y + yDelta,
+    })[0];
+    if (typeof nextPos !== 'undefined') {
+      app.player.position.x += xDelta,
+      app.player.position.y += yDelta;
+      app.outputToConsole(nextPos.get('text'));
+    } else {
+      app.outputToConsole("You are unable to move forward " + direction + '. There is a mysterious force blocking your path. Try another direction.');
+    }
   }
   app.observe = function(args) {
     app.outputToConsole("observe() args: " + args);
