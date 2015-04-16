@@ -19,10 +19,18 @@ $(function() {
       var parts = input.replace(/\s+/g, " ").split(" ");
       var command = parts[0];
       var args = parts.length > 1 ? parts.slice(1, parts.length) : [];
-      inField.val("");
-      for (var i = 0; i < app.commands.length; i++) {
-        if (command === app.commands[i].name) {
-          app.commands[i].handler(args);
+
+      inField.val(""); // reset the input fields
+
+      // Determine what the command is by doing a reverse look-up on
+      //  command mapping dictionary
+      var parsedCmd = _.findKey(app.gameCommands.mappings, function(lst) {
+        return _.contains(lst, command);
+      });
+
+      for (var i=0; i<app.gameCommands.handlers.length; i++) {
+        if (parsedCmd === app.gameCommands.handlers[i].name) {
+          app.gameCommands.handlers[i].handler(args);
           return;
         }
       }
