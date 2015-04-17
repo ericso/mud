@@ -1,11 +1,11 @@
 import json
 
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 
 from game.models import WorldNode
 
 
-class GameTest(TestCase):
+class GameTest(TransactionTestCase):
   """Test class for Game API
   Routes:
   GET /game/node/:id - Returns all nodes or a single one with :id
@@ -104,12 +104,13 @@ class GameTest(TestCase):
   def test_get_node_with_id_returns_single_node(self):
     # TODO(eso) can I mock out the database
     # and get rid of this db transaction?
-    WorldNode.objects.create(
+    node = WorldNode.objects.create(
       x=0,
       y=0,
       text="Start Here"
     )
-    response = self._get_nodes(node_id=1)
+    node_id = node.pk
+    response = self._get_nodes(node_id=node_id)
     resp_obj = json.loads(response.content.decode())
 
     self.assertIn('data', resp_obj.keys())
