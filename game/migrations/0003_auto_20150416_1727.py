@@ -4,12 +4,14 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 
 
+### This migration builds the game world ###
+
 def populate_world(apps, schema_editor):
   """Creates WorldNode objects from
   """
   # world is a set of tuples representing nodes: (x, y, text)
   world = [
-    (0, 0, "You wake up in a forest. Looking around, you see something north"),
+    (0, 0, "You wake up in a forest. Looking around, you see something to the north."),
     (0, 1, "More forest"),
     (0, 2, "You reach a high, smooth wall. The wall seems impenetrable and you are unable to get a foothold to climb."),
     (1, 0, "There is a river in the distance to the east."),
