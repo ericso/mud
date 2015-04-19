@@ -1,0 +1,39 @@
+Example of answering a riddle to open a container:
+
+"You see an odd pile of leaves on the ground. It looks as if someone was trying to hide something."
+
+> take leaves
+
+"The leaves were covering what looks to be a safe set into the ground. The material of the safe appears to be metallic, is cold the touch. There is a lever on the little door."
+
+> open safe
+
+"As soon as you place your hand on the lever, a vibration fills your head and you hear a fait voice: 'Answer my riddle, and I will grant you my contents'"
+
+> answer to riddle
+
+"You think your response to the safe and you hear a click, though nothing appears to be different about the safe."
+
+> open safe
+
+"The door easily slides open. Inside, you see two items, a key and a piece of paper."
+
+> take key
+
+"You examine the key, it has the word 'Scorpio' engraved in the head."
+
+> read paper
+
+"The paper is blank on both sides. Examining it you see nothing special about it."
+
+> look in safe
+
+"The safe appears to be empty."
+
+
+The player should now have in their inventory:
+- Scorpio key
+- Blank paper
+
+The safe should be marked as unlocked, opened, and empty
+The node where the safe is located should be marked as visited once
