@@ -1,0 +1,38 @@
+Schemas
+
+WorldNode {
+  x: int,
+  y: int,
+  dungeon: string,
+  visited: boolean,
+}
+
+x: x-coordinate
+y: y-coordinate
+dungeon: string indicating what dungeon the node is a part of; the world is identified by the string token 'world'
+
+visited: True if the player has visited the node, will have to update this for multiple players, after creating the players table
+
+
+
+NodeText {
+  unvisited: string
+  visited: string
+  look: string
+}
+
+unvisited: Text presented the first time player visits node
+visited: Text for when player visits a second time
+look: Text for when player looks at node but has not visited
+
+
+
+as things are taken by the player, their description should disappear from the game text
+
+maybe should have an array of objects, each object is a dictionary with description text?
+
+currently, text is outputted to the console when a player moves onto a node. The text can have several states, depending if the player has visited the node or not, or if they're merely examining it
+
+to get a minimum viable product
+add multiple player functionality
+add object interaction within a node
