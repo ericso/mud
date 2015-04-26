@@ -3,6 +3,6 @@ from django.conf.urls import patterns, url
 from game import views
 
 urlpatterns = patterns('',
-  # url(r'^node/(?P<node_id>[0-9]+)$', views.node, name='node'),
+  url(r'^dungeon/(?P<dungeon_id>w+)$', views.dungeon, name='dungeon'),
   url(r'^dungeon/$', views.dungeon, name='dungeon'),
 )

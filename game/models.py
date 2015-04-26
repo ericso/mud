@@ -1,11 +1,5 @@
 from django.db import models
 
-class WorldNode(models.Model):
-  """Represents a node in the game world
-  """
-  x = models.IntegerField()
-  y = models.IntegerField()
-
 
 class Dungeon(models.Model):
   """Collection of nodes representing a place in the game.
@@ -13,13 +7,15 @@ class Dungeon(models.Model):
   """
   name = models.TextField(default="Dungeon")
   description = models.TextField()
-  location = models.ForeignKey(WorldNode)
 
 
-class NodeText(models.Model):
-  """Text that a player would see upon visiting a node
+class WorldNode(models.Model):
+  """Represents a node in the game world
   """
+  x = models.IntegerField()
+  y = models.IntegerField()
   unvisited = models.TextField()
   visited = models.TextField()
   look = models.TextField()
-  location = models.ForeignKey(WorldNode)
+  dungeon = models.ForeignKey(Dungeon)
+
