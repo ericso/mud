@@ -17,20 +17,20 @@ def dungeon(request, dungeon_id=None):
 
   if request.method == 'GET':
     if dungeon_id:
-      # try:
-      #   dungeon = Dungeon.objects.get(pk=dungeon_id)
-      # except:
-      #   # Should somehow return a 404 error message
-      #   # TODO(eso) use Django REST Framework
-      #   response['status'] = "fail"
-      #   response['message'] = "dungeon with id: %s does not exist" % (node_id,)
-      # else:
-      #   response['status'] = "success"
-      #   # response['data'] = {}
-      #   # response['data']['nodes'] = serializers.serialize('json', [node])
-      # finally:
-      #   return JsonResponse(response)
-      pass
+      try:
+        dungeon = Dungeon.objects.get(pk=dungeon_id)
+      except:
+        # Should somehow return a 404 error message
+        # TODO(eso) use Django REST Framework
+        response['status'] = "fail"
+        response['message'] = "dungeon with id: %s does not exist" % (dungeon_id,)
+      else:
+        response['status'] = "success"
+        response['data'] = {}
+        response['data']['dungeons'] = serializers.serialize('json', [dungeon])
+      finally:
+        return JsonResponse(response)
+
 
     else:
       try:

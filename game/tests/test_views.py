@@ -1,4 +1,5 @@
 import json
+import random
 
 from django.test import TestCase, TransactionTestCase
 
@@ -22,7 +23,6 @@ class GameTest(TestCase):
     """
     """
     self.api_endpoint_base = '/game/dungeon/'
-    self._create_dungeons()
 
   def tearDown(self):
     """
@@ -31,12 +31,12 @@ class GameTest(TestCase):
 
   def _create_dungeons(self):
     """Creates a Dungeon and its WorldNodes db records
+    Returns the primary key of the dungeon
     """
     d1 = Dungeon.objects.create(
       name="World",
       description="This is the world!"
     )
-
     wn1 = WorldNode.objects.create(
       x = 0,
       y = 0,
@@ -53,6 +53,7 @@ class GameTest(TestCase):
       look = 'look node 2',
       dungeon = d1
     )
+    return d1.pk
 
   def _destroy_dungeons(self):
     """Deletes the Dungeon database
@@ -84,6 +85,7 @@ class GameTest(TestCase):
     )
     return response
 
+
   ### Test Methods ###
 
   # GET
@@ -92,12 +94,18 @@ class GameTest(TestCase):
     self.assertEqual(response.status_code, 200)
 
   def test_get_dungeon_returns_status_success(self):
+    self._create_dungeons()
+
     response = self._get_dungeons()
     resp_obj = json.loads(response.content.decode())
     self.assertIn('status', resp_obj.keys())
     self.assertEqual(resp_obj['status'], 'success')
 
+
+
   def test_get_dungeon_retuns_list_of_dungeons(self):
+    self._create_dungeons()
+
     response = self._get_dungeons()
     resp_obj = json.loads(response.content.decode())
     self.assertIn('data', resp_obj.keys())
@@ -106,29 +114,32 @@ class GameTest(TestCase):
     dungeons_obj = json.loads(resp_obj['data']['dungeons'])
     self.assertEqual(1, len(dungeons_obj))
 
-  # def test_get_dungeon_with_id_returns_single_node(self):
-  #   # TODO(eso) can I mock out the database
-  #   # and get rid of this db transaction?
-  #   dungeon = Dungeon.objects.create(
-  #     x=0,
-  #     y=0,
-  #     text="Start Here"
-  #   )
-  #   node_id = node.pk
-  #   response = self._get_nodes(node_id=node_id)
-  #   resp_obj = json.loads(response.content.decode())
+  def test_get_dungeon_with_id_returns_single_dungeon(self):
+    # TODO(eso) can I mock out the database
+    # and get rid of this db transaction?
+    dungeon_id = self._create_dungeons()
 
-  #   self.assertIn('data', resp_obj.keys())
-  #   self.assertIn('nodes', resp_obj['data'].keys())
+    response = self._get_dungeon_nodes(dungeon_id=dungeon_id)
+    resp_obj = json.loads(response.content.decode())
 
-  # def test_get_node_with_incorrect_id_returns_error_status(self):
-  #   node_id = 1
-  #   response = self._get_nodes(node_id=node_id)
-  #   resp_obj = json.loads(response.content.decode())
+    self.assertIn('data', resp_obj.keys())
+    self.assertIn('dungeons', resp_obj['data'].keys())
 
-  #   self.assertIn('status', resp_obj.keys())
-  #   self.assertEqual(resp_obj['status'], 'fail')
-  #   self.assertEqual(resp_obj['message'], 'node with id: %s does not exist' % (node_id,))
+  def test_get_dungeon_with_incorrect_id_returns_error_status(self):
+    dungeon_id = self._create_dungeons()
+    print(dungeon_id)
+
+    # Get a random integer to test incorrect dungeon id
+    rand_id = random.randint(1, 1000)
+    while dungeon_id == rand_id:
+      rand_id = random.randint(1, 1000)
+
+    response = self._get_dungeon_nodes(dungeon_id=rand_id)
+    resp_obj = json.loads(response.content.decode())
+
+    self.assertIn('status', resp_obj.keys())
+    self.assertEqual(resp_obj['status'], 'fail')
+    self.assertEqual(resp_obj['message'], 'dungeon with id: %s does not exist' % (rand_id,))
 
   # # POST
   # def test_post_node_returns_success_status(self):
