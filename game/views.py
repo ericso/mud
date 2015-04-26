@@ -30,8 +30,6 @@ def dungeon(request, dungeon_id=None):
         response['data']['dungeons'] = serializers.serialize('json', [dungeon])
       finally:
         return JsonResponse(response)
-
-
     else:
       try:
         dungeons = Dungeon.objects.all()
