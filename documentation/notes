@@ -14,6 +14,14 @@ dungeon: string indicating what dungeon the node is a part of; the world is iden
 visited: True if the player has visited the node, will have to update this for multiple players, after creating the players table
 
 
+Dungeon {
+  description: string,
+  location: foreign_key(WorldNode)
+}
+
+description: Text that explains the dungeon, not sure when the player would see this
+location: this is a foreign key ref to the world node from which the player can access this dungeon
+In the javascript, have a function called enter_dungeon()
 
 NodeText {
   unvisited: string
