@@ -12,6 +12,35 @@ def dungeon(request, dungeon_id=None):
   Routes:
   GET /game/dungeon/ - Returns all dungeons
   GET /game/dungeon/:id - Returns all nodes of a dungeon with :id
+
+  e.g.:
+  response to GET /game/dungeon/
+  {
+    'status': 'success',
+    'data': {
+      'dungeons': [
+        {
+          'pk': dungeon_id,
+          'name': 'dungeon name',
+          'description': 'dungeon description',
+        }
+      ]
+    }
+  }
+
+  response to GET /game/dungeon/:id
+  {
+    'status': 'success',
+    'data': {
+      'nodes': [
+        'x': 0,
+        'y': 1,
+        'unvisited': 'some text',
+        'visited': 'some other text',
+        'look': 'and still more text',
+      ]
+    }
+  }
   """
   response = {}
 
